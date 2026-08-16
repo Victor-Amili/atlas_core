@@ -1,25 +1,60 @@
-"""
-Real Data Fetcher
-Fetches daily data from Yahoo Finance.
-"""
-import pandas as pd
-import numpy as np
+# """
+# Real Data Fetcher
+# Fetches daily data from Yahoo Finance.
+# """
+# import pandas as pd
+# import numpy as np
 
-def yahoo(ticker, start='2020-01-01', end=None):
-    """
-    Fetch DAILY data from Yahoo Finance.
+# def yahoo(ticker, start='2020-01-01', end=None):
+#     """
+#     Fetch DAILY data from Yahoo Finance.
     
-    Tickers:
-    - Stocks: 'AAPL', 'TSLA', 'NVDA', 'MSFT'
-    - ETFs: 'SPY', 'QQQ', 'VTI'
-    - Crypto: 'BTC-USD', 'ETH-USD', 'SOL-USD'
-    - Forex: 'EURUSD=X', 'GBPUSD=X'
-    - Commodities: 'GC=F' (Gold), 'CL=F' (Oil)
+#     Tickers:
+#     - Stocks: 'AAPL', 'TSLA', 'NVDA', 'MSFT'
+#     - ETFs: 'SPY', 'QQQ', 'VTI'
+#     - Crypto: 'BTC-USD', 'ETH-USD', 'SOL-USD'
+#     - Forex: 'EURUSD=X', 'GBPUSD=X'
+#     - Commodities: 'GC=F' (Gold), 'CL=F' (Oil)
+#     """
+#     try:
+#         import yfinance as yf
+#         print(f"Downloading {ticker} daily data from Yahoo Finance...")
+#         df = yf.download(ticker, start=start, end=end, interval='1d', progress=False)
+        
+#         if isinstance(df.columns, pd.MultiIndex):
+#             df.columns = df.columns.get_level_values(0)
+        
+#         col_map = {
+#             'Open': 'open', 'High': 'high', 'Low': 'low',
+#             'Close': 'close', 'Adj Close': 'close', 'Volume': 'volume'
+#         }
+#         df = df.rename(columns=col_map)
+#         df = df.dropna(subset=['open', 'high', 'low', 'close'])
+        
+#         print(f"   Loaded {len(df)} days | {df.index[0].date()} -> {df.index[-1].date()}")
+#         print(f"   Price: ${df['close'].min():.2f} - ${df['close'].max():.2f}")
+#         return df
+        
+#     except ImportError:
+#         print("Install yfinance: pip install yfinance")
+#         return None
+#     except Exception as e:
+#         print(f"Error: {e}")
+#         return None
+
+import pandas as pd
+
+def yahoo(ticker, start='2020-01-01', end=None, interval='1d'):
+    """
+    Fetch data from Yahoo Finance.
+    
+    interval options: '1d' (daily), '1h' (hourly), '1wk', '1mo'
+    Note: 1h data maxes out at ~730 days (2 years)
     """
     try:
         import yfinance as yf
-        print(f"Downloading {ticker} daily data from Yahoo Finance...")
-        df = yf.download(ticker, start=start, end=end, interval='1d', progress=False)
+        print(f"⬇️  Downloading {ticker} ({interval}) from Yahoo Finance...")
+        df = yf.download(ticker, start=start, end=end, interval=interval, progress=False)
         
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
@@ -31,13 +66,13 @@ def yahoo(ticker, start='2020-01-01', end=None):
         df = df.rename(columns=col_map)
         df = df.dropna(subset=['open', 'high', 'low', 'close'])
         
-        print(f"   Loaded {len(df)} days | {df.index[0].date()} -> {df.index[-1].date()}")
+        print(f"   ✅ {len(df)} candles | {df.index[0]} → {df.index[-1]}")
         print(f"   Price: ${df['close'].min():.2f} - ${df['close'].max():.2f}")
         return df
         
     except ImportError:
-        print("Install yfinance: pip install yfinance")
+        print("❌ Run: pip install yfinance")
         return None
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error: {e}")
         return None
